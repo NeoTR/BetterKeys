@@ -28,6 +28,7 @@ public class Main implements NativeKeyListener {
     private Random random = new Random(); // Random number generator
     static String appDataDir;
     static String soundFilePath;
+    private boolean isKeyPressed = false;
 
     public static void main(String[] args) throws IOException {
         // Get the logger for "org.jnativehook" and set the level to off
@@ -90,36 +91,39 @@ public class Main implements NativeKeyListener {
     }
 
     public void nativeKeyPressed(NativeKeyEvent e) {
-        try {
-            if (currentClip != null && currentClip.isRunning()) {
-                currentClip.stop();
+        if (!isKeyPressed) {
+            isKeyPressed = true;
+            try {
+                if (currentClip != null && currentClip.isRunning()) {
+                    currentClip.stop();
+                }
+
+                AudioInputStream audioIn = AudioSystem.getAudioInputStream(new File(soundFilePath));
+
+                // Get a sound clip resource.
+                currentClip = AudioSystem.getClip();
+
+                currentClip.open(audioIn);
+
+                // Get the volume control and randomize its value
+                FloatControl volumeControl = (FloatControl) currentClip.getControl(FloatControl.Type.MASTER_GAIN);
+                float currentVolume = volumeControl.getValue();
+
+                float volumeChange = (random.nextFloat() - 0.5f) * 0.5f;
+                float newVolume = currentVolume + volumeChange;
+                newVolume = Math.max(volumeControl.getMinimum(), newVolume); // Ensure volume isn't too low
+                newVolume = Math.min(volumeControl.getMaximum(), newVolume); // Ensure volume isn't too high
+                volumeControl.setValue(newVolume);
+
+                currentClip.start();
+            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
+                ex.printStackTrace();
             }
-
-            AudioInputStream audioIn = AudioSystem.getAudioInputStream(new File(soundFilePath));
-
-            // Get a sound clip resource.
-            currentClip = AudioSystem.getClip();
-
-            currentClip.open(audioIn);
-
-            // Get the volume control and randomize its value
-            FloatControl volumeControl = (FloatControl) currentClip.getControl(FloatControl.Type.MASTER_GAIN);
-            float currentVolume = volumeControl.getValue();
-
-            float volumeChange = (random.nextFloat() - 0.5f) * 0.5f;
-            float newVolume = currentVolume + volumeChange;
-            newVolume = Math.max(volumeControl.getMinimum(), newVolume); // Ensure volume isn't too low
-            newVolume = Math.min(volumeControl.getMaximum(), newVolume); // Ensure volume isn't too high
-            volumeControl.setValue(newVolume);
-
-            currentClip.start();
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
-            ex.printStackTrace();
         }
     }
 
     public void nativeKeyReleased(NativeKeyEvent e) {
-        // Handle key release
+        isKeyPressed = false;
     }
 
     public void nativeKeyTyped(NativeKeyEvent e) {
