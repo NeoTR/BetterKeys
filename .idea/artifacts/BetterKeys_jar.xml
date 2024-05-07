@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="BetterKeys:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BetterKeys_jar</output-path>
+    <root id="archive" name="BetterKeys.jar">
+      <element id="module-output" name="BetterKeys" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/1stleg/jnativehook/2.1.0/jnativehook-2.1.0.jar" path-in-jar="/" />
+      <element id="library" level="project" name="Maven: com.github.lalyos:ascii-art:1.7" />
+    </root>
+  </artifact>
+</component>
